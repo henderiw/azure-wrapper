@@ -12,6 +12,7 @@ type NsgConfYML struct {
 	NsgData struct {
 		Enterprise string   `yaml:"enterprise"`
 		NsgName    string   `yaml:"nsg_name"`
+		NsgPort    string   `yaml:"nsg_port"`
 		PublicIP   string   `yaml:"public_ip"`
 		BgpEnabled bool     `yaml:"bgp_enabled"`
 		BgpNsgAsn  int64    `yaml:"bgp_nsg_asn"`

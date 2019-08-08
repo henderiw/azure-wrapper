@@ -39,7 +39,7 @@ func CreateStorageSasURL(containerName, blobName string) (sasURL string, err err
 	// Create the container
 	ctx := context.Background() // This example uses a never-expiring context
 	_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
-	log.Fatal("Container URL create/: " + err.Error())
+	log.Println("Container URL create/: " + err.Error())
 
 	sasQueryParams, err := azblob.BlobSASSignatureValues{
 		Protocol:      azblob.SASProtocolHTTPS, // Users MUST use HTTPS (not HTTP)

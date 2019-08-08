@@ -7,12 +7,12 @@ import (
 
 //GetGroup wrapper using the azure go SDK
 func GetGroup() (group resources.Group, err error) {
-	groupsClient := resources.NewGroupsClient(clientData.SubscriptionID)
-	groupsClient.Authorizer = authorizer
+	groupsClient := resources.NewGroupsClient(ClientData.SubscriptionID)
+	groupsClient.Authorizer = Authorizer
 
 	return groupsClient.CreateOrUpdate(
 		ctx,
-		clientData.ResourceGroupName,
+		ClientData.ResourceGroupName,
 		resources.Group{
-			Location: to.StringPtr(clientData.ResourceGroupLocation)})
+			Location: to.StringPtr(ClientData.ResourceGroupLocation)})
 }

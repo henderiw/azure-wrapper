@@ -44,8 +44,8 @@ type AzureVWanCfg struct {
 // GetVirtualWansClient wrapper using the azure go SDK
 func GetVirtualWansClient() network.VirtualWansClient {
 	log.Println("Get virtual wan client data")
-	client := network.NewVirtualWansClient(clientData.SubscriptionID)
-	client.Authorizer = authorizer
+	client := network.NewVirtualWansClient(ClientData.SubscriptionID)
+	client.Authorizer = Authorizer
 	return client
 }
 
@@ -53,7 +53,7 @@ func GetVirtualWansClient() network.VirtualWansClient {
 func GetVwan(vwanName string) (vwan network.VirtualWAN, err error) {
 	log.Println("Get virtual wan data")
 	vwanClient := GetVirtualWansClient()
-	return vwanClient.Get(ctx, clientData.ResourceGroupName, vwanName)
+	return vwanClient.Get(ctx, ClientData.ResourceGroupName, vwanName)
 }
 
 // CreateVwan wrapper using the azure go SDK
@@ -63,10 +63,10 @@ func CreateVwan(vwanName string) (vwan network.VirtualWAN, err error) {
 
 	future, err := vwanClient.CreateOrUpdate(
 		ctx,
-		clientData.ResourceGroupName,
+		ClientData.ResourceGroupName,
 		vwanName,
 		network.VirtualWAN{
-			Location: to.StringPtr(clientData.ResourceGroupLocation),
+			Location: to.StringPtr(ClientData.ResourceGroupLocation),
 			VirtualWanProperties: &network.VirtualWanProperties{
 				AllowBranchToBranchTraffic: to.BoolPtr(true),
 			},
@@ -89,7 +89,7 @@ func CreateVwan(vwanName string) (vwan network.VirtualWAN, err error) {
 func DeleteVwan(name string) (err error) {
 	client := GetVirtualWansClient()
 
-	future, err := client.Delete(ctx, clientData.ResourceGroupName, name)
+	future, err := client.Delete(ctx, ClientData.ResourceGroupName, name)
 	if err != nil {
 		return fmt.Errorf("cannot delete vwan: %v", err)
 
@@ -107,27 +107,27 @@ func DeleteVwan(name string) (err error) {
 
 // GetVirtualHubsClient wrapper using the azure go SDK
 func GetVirtualHubsClient() network.VirtualHubsClient {
-	client := network.NewVirtualHubsClient(clientData.SubscriptionID)
-	client.Authorizer = authorizer
+	client := network.NewVirtualHubsClient(ClientData.SubscriptionID)
+	client.Authorizer = Authorizer
 	return client
 }
 
 // GetVhub wrapper using the azure go SDK
 func GetVhub(vhubName string) (vwan network.VirtualHub, err error) {
 	vhubClient := GetVirtualHubsClient()
-	return vhubClient.Get(ctx, clientData.ResourceGroupName, vhubName)
+	return vhubClient.Get(ctx, ClientData.ResourceGroupName, vhubName)
 }
 
 // CreateVhub wrapper using the azure go SDK
-func CreateVhub(vhubName, vwanID, ip string) (vwan network.VirtualHub, err error) {
+func CreateVhub(vhubName, vwanID, ip, location string) (vwan network.VirtualHub, err error) {
 	client := GetVirtualHubsClient()
 
 	future, err := client.CreateOrUpdate(
 		ctx,
-		clientData.ResourceGroupName,
+		ClientData.ResourceGroupName,
 		vhubName,
 		network.VirtualHub{
-			Location: to.StringPtr(clientData.ResourceGroupLocation),
+			Location: to.StringPtr(location),
 			VirtualHubProperties: &network.VirtualHubProperties{
 				AddressPrefix: to.StringPtr(ip),
 				VirtualWan: &network.SubResource{
@@ -153,7 +153,7 @@ func CreateVhub(vhubName, vwanID, ip string) (vwan network.VirtualHub, err error
 func DeleteVhub(name string) (err error) {
 	client := GetVirtualHubsClient()
 
-	future, err := client.Delete(ctx, clientData.ResourceGroupName, name)
+	future, err := client.Delete(ctx, ClientData.ResourceGroupName, name)
 	if err != nil {
 		return fmt.Errorf("cannot delete vhub: %v", err)
 	}
@@ -170,19 +170,19 @@ func DeleteVhub(name string) (err error) {
 
 // GetVpnSitesClient wrapper using the azure go SDK
 func GetVpnSitesClient() network.VpnSitesClient {
-	client := network.NewVpnSitesClient(clientData.SubscriptionID)
-	client.Authorizer = authorizer
+	client := network.NewVpnSitesClient(ClientData.SubscriptionID)
+	client.Authorizer = Authorizer
 	return client
 }
 
 // GetVpnSite wrapper using the azure go SDK
 func GetVpnSite(name string) (vpnsite network.VpnSite, err error) {
 	client := GetVpnSitesClient()
-	return client.Get(ctx, clientData.ResourceGroupName, name)
+	return client.Get(ctx, ClientData.ResourceGroupName, name)
 }
 
 // CreateVpnSite wrapper using the azure go SDK
-func CreateVpnSite(name, vwanID string, nsgConf nsgConfYML) (vpnSite network.VpnSite, err error) {
+func CreateVpnSite(name, vwanID, location string, nsgConf NsgConfYML) (vpnSite network.VpnSite, err error) {
 	client := GetVpnSitesClient()
 
 	var future network.VpnSitesCreateOrUpdateFuture
@@ -190,10 +190,10 @@ func CreateVpnSite(name, vwanID string, nsgConf nsgConfYML) (vpnSite network.Vpn
 	if nsgConf.NsgData.BgpEnabled == false {
 		future, err = client.CreateOrUpdate(
 			ctx,
-			clientData.ResourceGroupName,
+			ClientData.ResourceGroupName,
 			name,
 			network.VpnSite{
-				Location: to.StringPtr(clientData.ResourceGroupLocation),
+				Location: to.StringPtr(location),
 				VpnSiteProperties: &network.VpnSiteProperties{
 					VirtualWan: &network.SubResource{
 						ID: to.StringPtr(vwanID),
@@ -213,10 +213,10 @@ func CreateVpnSite(name, vwanID string, nsgConf nsgConfYML) (vpnSite network.Vpn
 	} else {
 		future, err = client.CreateOrUpdate(
 			ctx,
-			clientData.ResourceGroupName,
+			ClientData.ResourceGroupName,
 			name,
 			network.VpnSite{
-				Location: to.StringPtr(clientData.ResourceGroupLocation),
+				Location: to.StringPtr(location),
 				VpnSiteProperties: &network.VpnSiteProperties{
 					VirtualWan: &network.SubResource{
 						ID: to.StringPtr(vwanID),
@@ -255,7 +255,7 @@ func CreateVpnSite(name, vwanID string, nsgConf nsgConfYML) (vpnSite network.Vpn
 func DeleteVpnSite(name string) (err error) {
 	client := GetVpnSitesClient()
 
-	future, err := client.Delete(ctx, clientData.ResourceGroupName, name)
+	future, err := client.Delete(ctx, ClientData.ResourceGroupName, name)
 	if err != nil {
 		return fmt.Errorf("cannot delete vpnSite: %v", err)
 	}
@@ -272,19 +272,19 @@ func DeleteVpnSite(name string) (err error) {
 
 // GetVpnGatewaysClient wrapper using the azure go SDK
 func GetVpnGatewaysClient() network.VpnGatewaysClient {
-	client := network.NewVpnGatewaysClient(clientData.SubscriptionID)
-	client.Authorizer = authorizer
+	client := network.NewVpnGatewaysClient(ClientData.SubscriptionID)
+	client.Authorizer = Authorizer
 	return client
 }
 
 // GetVpnGateway wrapper using the azure go SDK
 func GetVpnGateway(name string) (vpngw network.VpnGateway, err error) {
 	client := GetVpnGatewaysClient()
-	return client.Get(ctx, clientData.ResourceGroupName, name)
+	return client.Get(ctx, ClientData.ResourceGroupName, name)
 }
 
 // CreateVpnGateway wrapper using the azure go SDK
-func CreateVpnGateway(name, vhubID, vsiteID string, nsgConf nsgConfYML) (vpngw network.VpnGateway, err error) {
+func CreateVpnGateway(name, vhubID, vsiteID, location string, nsgConf NsgConfYML) (vpngw network.VpnGateway, err error) {
 	client := GetVpnGatewaysClient()
 
 	var future network.VpnGatewaysCreateOrUpdateFuture
@@ -292,10 +292,10 @@ func CreateVpnGateway(name, vhubID, vsiteID string, nsgConf nsgConfYML) (vpngw n
 	if vsiteID != "" {
 		future, err = client.CreateOrUpdate(
 			ctx,
-			clientData.ResourceGroupName,
+			ClientData.ResourceGroupName,
 			name,
 			network.VpnGateway{
-				Location: to.StringPtr(clientData.ResourceGroupLocation),
+				Location: to.StringPtr(location),
 				VpnGatewayProperties: &network.VpnGatewayProperties{
 					VirtualHub: &network.SubResource{
 						ID: to.StringPtr(vhubID),
@@ -320,10 +320,10 @@ func CreateVpnGateway(name, vhubID, vsiteID string, nsgConf nsgConfYML) (vpngw n
 	} else {
 		future, err = client.CreateOrUpdate(
 			ctx,
-			clientData.ResourceGroupName,
+			ClientData.ResourceGroupName,
 			name,
 			network.VpnGateway{
-				Location: to.StringPtr(clientData.ResourceGroupLocation),
+				Location: to.StringPtr(location),
 				VpnGatewayProperties: &network.VpnGatewayProperties{
 					VirtualHub: &network.SubResource{
 						ID: to.StringPtr(vhubID),
@@ -349,15 +349,15 @@ func CreateVpnGateway(name, vhubID, vsiteID string, nsgConf nsgConfYML) (vpngw n
 }
 
 // UpdateVpnGateway wrapper using the azure go SDK
-func UpdateVpnGateway(name, vhubID string, conn []network.VpnConnection) (vpngw network.VpnGateway, err error) {
+func UpdateVpnGateway(name, vhubID, location string, conn []network.VpnConnection) (vpngw network.VpnGateway, err error) {
 	client := GetVpnGatewaysClient()
 
 	future, err := client.CreateOrUpdate(
 		ctx,
-		clientData.ResourceGroupName,
+		ClientData.ResourceGroupName,
 		name,
 		network.VpnGateway{
-			Location: to.StringPtr(clientData.ResourceGroupLocation),
+			Location: to.StringPtr(location),
 			VpnGatewayProperties: &network.VpnGatewayProperties{
 				VirtualHub: &network.SubResource{
 					ID: to.StringPtr(vhubID),
@@ -386,7 +386,7 @@ func UpdateVpnGateway(name, vhubID string, conn []network.VpnConnection) (vpngw 
 func DeleteVpnGateway(name string) (err error) {
 	client := GetVpnGatewaysClient()
 
-	future, err := client.Delete(ctx, clientData.ResourceGroupName, name)
+	future, err := client.Delete(ctx, ClientData.ResourceGroupName, name)
 	if err != nil {
 		return fmt.Errorf("cannot delete vpnGw: %v", err)
 	}
@@ -403,8 +403,8 @@ func DeleteVpnGateway(name string) (err error) {
 
 // GetVpnSitesConfigurationClient wrapper using the azure go SDK
 func GetVpnSitesConfigurationClient() network.VpnSitesConfigurationClient {
-	client := network.NewVpnSitesConfigurationClient(clientData.SubscriptionID)
-	client.Authorizer = authorizer
+	client := network.NewVpnSitesConfigurationClient(ClientData.SubscriptionID)
+	client.Authorizer = Authorizer
 	return client
 }
 
@@ -414,7 +414,7 @@ func DownloadVpnSitesConfig(vwanName, vsiteID, url string) (err error) {
 
 	future, err := client.Download(
 		ctx,
-		clientData.ResourceGroupName,
+		ClientData.ResourceGroupName,
 		vwanName,
 		network.GetVpnSitesConfigurationRequest{
 			OutputBlobSasURL: to.StringPtr(url),
